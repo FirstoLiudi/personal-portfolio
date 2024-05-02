@@ -89,7 +89,7 @@ div,p,button,span,textarea,input{
 .window-header {
   color: white;
   cursor: move;
-  display: flex;
+  display: flex !important; 
   flex-direction: row;
   /* background-color: darkroyalblue; */
 
