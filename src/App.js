@@ -63,19 +63,19 @@ function App() {
   );
 }
 
-function FloatingApps({programs,openProgram}) {
+function FloatingApps({ programs, openProgram }) {
   return (
     <div className='floating-app-space'>
       {
         programs.map(program => {
-          return <FloatingApp app={program}/>;
+          return <FloatingApp app={program} />;
         })
       }
     </div>
   );
 
-  function FloatingApp({app}) {
-    const clickHandler=()=>openProgram(app);
+  function FloatingApp({ app }) {
+    const clickHandler = () => openProgram(app);
     return <div className='floating-app' onDoubleClick={clickHandler}>
       <img className='floating-app-icon' src={app.icon} alt={app.name + ' icon'} />
       <span className='floating-app-label'>{app.name}</span>
