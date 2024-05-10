@@ -34,17 +34,14 @@ div,p,button,span,textarea,input{
 }
 
 .floating-app-space {
-  /* position: relative; */
   display: grid;
   grid-auto-flow: column;
   grid-template-columns: repeat(auto-fill, 80px);
   grid-template-rows: repeat(auto-fill, 80px);
-  /* gap: 10px 10px; */
   width: 100%;
   height: 100%;
 
   .floating-app {
-    /* border: 2px solid blue; */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -52,7 +49,6 @@ div,p,button,span,textarea,input{
     max-height: 100%;
     padding: 5px;
     margin: auto;
-    /* overflow: hidden; */
 
     .floating-app-icon {
       width: 35px;
@@ -82,8 +78,6 @@ div,p,button,span,textarea,input{
   background-color: royalblue;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
-  /* width: 300px;
-  height: 200px; */
 }
 
 .window-header {
@@ -91,7 +85,6 @@ div,p,button,span,textarea,input{
   cursor: move;
   display: flex !important; 
   flex-direction: row;
-  /* background-color: darkroyalblue; */
 
   .window-name {
     flex-grow: 1;
@@ -99,7 +92,6 @@ div,p,button,span,textarea,input{
     flex-direction: row;
     align-items: center;
 
-    /* background-color: lightroyalblue; */
     .window-icon {
       width: 17px;
       height: 17px;
@@ -144,7 +136,6 @@ div,p,button,span,textarea,input{
 
   .taskbar-start-menu {
     .taskbar-start {
-      /* height:100% cause bug on phone */
       height: 30px;
       width: 90px;
     }
@@ -230,6 +221,7 @@ div,p,button,span,textarea,input{
 
 
   .taskbar-window-list {
+    flex-grow: 1;
     display: flex;
     flex-direction: row;
     overflow-x: auto;
@@ -248,145 +240,21 @@ div,p,button,span,textarea,input{
       }
     }
   }
-}
 
-
-
-
-
-.deck {
-  /* position: relative; */
-
-  display: flex;
-  flex-direction: row;
-  justify-content: start;
-  align-items: start;
-
-  background-color: darkcyan;
-  width: fit-content;
-  height: fit-content;
-  /* border-top: 50vh solid black; */
-  margin: 20px;
-  /* padding-left: 50px; */
-}
-
-.card-container {
-  position: relative;
-  /* background-color: white;
-  border: solid royalblue; */
-  margin-right: -50px;
-
-  transform: rotateX(35deg) rotateY(35deg);
-  transition: 200ms;
-}
-
-.card-container:last-child {
-  margin-right: 0;
-}
-
-.card-click-area {
-  position: absolute;
-  /* background-color: green; */
-  width: 100%;
-  height: 100%;
-
-  z-index: 1;
-}
-
-.card {
-  display: flex;
-  flex-direction: column;
-  /* align-items: end; */
-
-  color: white;
-  background-color: red;
-  box-shadow: 0 0 20px black;
-  width: 100px;
-  max-height: 100px;
-
-  transition: 1000ms, width 0ms;
-
-  h1 {
-    align-self: flex-end;
-    margin: 0;
-    margin-right: 10px;
-  }
-
-  .card-description {
-    /* background-color: inherit; */
-    overflow: hidden;
-    /* transition: height 1000ms; */
+  .taskbar-clock{
+    color: white;
+    background-color: dodgerblue;
+    padding-inline: 20px;
+    display: flex;
+    align-items: center;
   }
 }
-
-.card-container:hover {
-  transform: none;
-
-  .card {
-    max-height: 100vh;
-    margin-top: 50px;
-    color: black;
-    background-color: yellow;
-  }
-}
-
-@keyframes spinY {
-  0% {
-    transform: rotateY(0deg);
-  }
-
-  100% {
-    transform: rotateY(360deg);
-  }
-}
-
-.card-clicked {
-  animation: spinY 1000ms 1;
-
-  .card {
-    background-color: green;
-  }
-}
-
-.test {
-  .card {
-
-    background-color: royalblue;
-  }
-}
-
-/* .card-clicked {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  margin: 0;
-
-  transform: none;
-  transition: 0ms;
-  pointer-events: none;
-
-  .card-click-area {
-    display: none;
-  }
-
-  .card {
-    background-color: royalblue;
-    width: 100%;
-    height: auto;
-  }
-} */
 
 .contact-main{
-  /* display: grid;
-  grid-auto-flow: row;
-  grid-template-columns: repeat(auto-fill, 600px);
-  grid-template-rows: repeat(auto-fill, auto);
-  width: 100%;
-  height: 100%; */
   display:flex;
   flex-direction:row;
-  gap: 50px;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 .contact-info-container{
   flex: 1;
@@ -394,11 +262,11 @@ div,p,button,span,textarea,input{
 }
 .contact-form-container{
   flex: 1;
-  max-width:400px;
+  min-width:150px;
+  max-width:500px;
 }
 .contact-form{
   width:auto;
-  margin:10px;
   display:flex;
   flex-direction:column;
   gap:5px;

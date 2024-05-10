@@ -1,33 +1,29 @@
-import wallpaper from './wallpaper.webp';
-import user_icon from './user-icon.jpeg';
-import home_icon from './icon-home.png';
-import about_icon from './icon-about.png';
-import folder_icon from './icon-folder.ico';
-import contact_icon from './icon-contact.png';
-import notepad_icon from './icon-notepad.png';
-import taskbar_start_icon from './icon-taskbar-start.jpeg'
-import logo from './logo.svg';
+import wallpaper from './img/wallpaper.webp';
+import user_icon from './img/user-icon.jpeg';
+import home_icon from './img/icon-home.png';
+import about_icon from './img/icon-about.png';
+import folder_icon from './img/icon-folder.ico';
+import contact_icon from './img/icon-contact.png';
+import notepad_icon from './img/icon-notepad.png';
+import taskbar_start_icon from './img/icon-taskbar-start.jpeg';
 import './App.css';
+import emailjs from '@emailjs/browser';
 import React from 'react';
 
 const mainPrograms = [
-  { name: 'Home', icon: home_icon, content: <HomePage />, width: 300, height: 400 },
-  { name: 'About', icon: about_icon, content: <AboutPage />, width: 300, height: 400 },
-  { name: 'Projects', icon: folder_icon, content: <ProjectsPage />, width: 300, height: 400 },
-  { name: 'Contact', icon: contact_icon, content: <ContactPage />, width: 300, height: 400 },
-  { name: 'Notepad', icon: notepad_icon, content: <Notepad />, width: 300, height: 400 },
-  { name: 'Test', icon: logo, content: <Test />, width: 300, height: 400 },
+  { name: 'Home', icon: home_icon, content: <HomePage />, width: '60vw', height: '70vh' },
+  { name: 'About', icon: about_icon, content: <AboutPage />, width: '60vw', height: '70vh' },
+  { name: 'Projects', icon: folder_icon, content: <ProjectsPage />, width: '60vw', height: '70vh' },
+  { name: 'Contact', icon: contact_icon, content: <ContactPage />, width: '60vw', height: '70vh' },
+  { name: 'Notepad', icon: notepad_icon, content: <Notepad />, width: '60vw', height: '70vh' },
 ];
 const allPrograms = [
-  { name: 'Other Home', icon: home_icon, content: <HomePage />, width: 300, height: 400 },
-  { name: 'Other About', icon: about_icon, content: <AboutPage />, width: 300, height: 400 },
-  { name: 'Other Projects', icon: folder_icon, content: <ProjectsPage />, width: 300, height: 400 },
-  { name: 'Other Contact', icon: contact_icon, content: <ContactPage />, width: 300, height: 400 },
-  { name: 'Other Notepad', icon: notepad_icon, content: <Notepad />, width: 300, height: 400 },
-  { name: 'Other Test', icon: logo, content: <Test />, width: 300, height: 400 },
+  { name: 'Home', icon: home_icon, content: <HomePage />, width: '60vw', height: '70vh' },
+  { name: 'About', icon: about_icon, content: <AboutPage />, width: '60vw', height: '70vh' },
+  { name: 'Projects', icon: folder_icon, content: <ProjectsPage />, width: '60vw', height: '70vh' },
+  { name: 'Contact', icon: contact_icon, content: <ContactPage />, width: '60vw', height: '70vh' },
+  { name: 'Notepad', icon: notepad_icon, content: <Notepad />, width: '60vw', height: '70vh' },
 ];
-
-let openProgramG;
 
 function App() {
   const [processes, setProcesses] = React.useState([]);
@@ -35,19 +31,18 @@ function App() {
   const openProgram = program => {
     const lastProgram = processes[processes.length - 1];
     const newId = lastProgram ? lastProgram.id + 1 : 0;
-    const process = { ...program, name: program.name || newId, id: newId }
+    const process = { ...program, name: program.name || newId, id: newId };
     setProcesses([...processes, process]);
   };
-  openProgramG = openProgram;
   function getMaxZIndex() { return Math.max(...processes.map(p => p.zIndex ? p.zIndex : 0)); }
   const focusWindow = pId => {
     setProcesses(processes.map(p => p.id === pId ? { ...p, zIndex: getMaxZIndex() + 1 } : p));
   };
-  const toggleMinimizeWindow = pId => {
+  const minimizeWindow = pId => {
     setProcesses(processes.map(p => p.id === pId ? { ...p, zIndex: p.zIndex < 0 ? getMaxZIndex() + 1 : -1 } : p));
   };
   const closeWindow = pId => {
-    setProcesses(processes.filter(p => p.id != pId));
+    setProcesses(processes.filter(p => p.id !== pId));
   };
   React.useEffect(() => {
     const maxZIndex = getMaxZIndex();
@@ -56,84 +51,110 @@ function App() {
   return (
     <div className="App" style={{ backgroundImage: 'url("' + wallpaper + '")', backgroundSize: '100% 100%' }}>
       <div className='work-area'>
-        <div className='floating-app-space'>
-          {
-            mainPrograms.map(program => {
-              return (
-                <div className='floating-app' onDoubleClick={() => openProgram(program)}>
-                  <img className='floating-app-icon' src={program.icon} />
-                  <span className='floating-app-label'>{program.name}</span>
-                </div>
-              );
-            })
-          }
-        </div>
+        <FloatingApps programs={allPrograms} openProgram={openProgram} />
         {
           processes.map(process => {
-            return <Window key={process.id} process={process} focusWindow={focusWindow} toggleMinimizeWindow={toggleMinimizeWindow} closeWindow={closeWindow} focus={focus} />;
+            return <Window key={process.id} process={process} focusWindow={focusWindow} minimizeWindow={minimizeWindow} closeWindow={closeWindow} focus={focus} />;
           })
         }
       </div>
-      <Taskbar username={'Firsto'} processes={processes} focusWindow={focusWindow} toggleMinimizeWindow={toggleMinimizeWindow} />
+      <Taskbar username={'Firsto'} processes={processes} openProgram={openProgram} focusWindow={focusWindow} />
     </div>
   );
 }
 
-function Taskbar({ username, processes, toggleMinimizeWindow, focusWindow }) {
+function FloatingApps({programs,openProgram}) {
+  return (
+    <div className='floating-app-space'>
+      {
+        programs.map(program => {
+          return <FloatingApp app={program}/>;
+        })
+      }
+    </div>
+  );
+
+  function FloatingApp({app}) {
+    const clickHandler=()=>openProgram(app);
+    return <div className='floating-app' onDoubleClick={clickHandler}>
+      <img className='floating-app-icon' src={app.icon} alt={app.name + ' icon'} />
+      <span className='floating-app-label'>{app.name}</span>
+    </div>;
+  }
+}
+
+function Taskbar({ username, processes, focusWindow, openProgram }) {
   return <div className='taskbar'>
     <TaskbarMenu username={username} />
     <div className='taskbar-window-list'>
       {
         processes.map(process => {
-          return <TaskbarButton process={process} focusWindow={focusWindow} toggleMinimizeWindow={toggleMinimizeWindow} />
+          return <TaskbarButton process={process} />
         })
       }
     </div>
+    <TaskbarClock />
   </div>;
-}
 
-function TaskbarMenu({ username }) {
-  // const [showMenu, setShowMenu] = React.useState(false);
-  // const mouseLeaveHandler = () => { setShowMenu(false); }
-  // const mouseOverHandler = () => { setShowMenu(true); }
-  return (<div className='taskbar-start-menu'>
-    <img className='taskbar-start' src={taskbar_start_icon} />
-    <div className='taskbar-menu'>
-      <div className='taskbar-menu-user'>
-        <img src={user_icon} className='taskbar-menu-user-icon' />
-        <h2 className='taskbar-menu-user-name'>{username}</h2>
+  function TaskbarClock() {
+    function getCurrentTime() {
+      const date = new Date();
+      const h = date.getHours();
+      const m = date.getMinutes().toString().padStart(2, '0');
+      const s = date.getSeconds().toString().padStart(2, '0');
+      return `${h % 12}:${m}:${s} ${h < 12 ? 'AM' : 'PM'}`;
+    }
+    const [time, setTime] = React.useState(getCurrentTime());
+    React.useEffect(() => {
+      setInterval(() => setTime(getCurrentTime), 1000);
+    }, []);
+    return (
+      <div className='taskbar-clock'>
+        <span>{time}</span>
       </div>
-      <div className='taskbar-menu-list'>
-        {mainPrograms.map(program => <TaskBarMenuButton program={program} />)}
-        <hr />
-        <h2 className='taskbar-menu-item taskbar-all-programs'>
-          All programs ▶
-          <div className='taskbar-all-programs-list'>
-            {allPrograms.map(program => <TaskBarMenuButton program={program} />)}
-          </div>
-        </h2>
+    );
+  }
+
+  function TaskbarMenu({ username }) {
+    return (<div className='taskbar-start-menu'>
+      <img className='taskbar-start' src={taskbar_start_icon} alt='start button' />
+      <div className='taskbar-menu'>
+        <div className='taskbar-menu-user'>
+          <img src={user_icon} className='taskbar-menu-user-icon' alt='user icon' />
+          <h2 className='taskbar-menu-user-name'>{username}</h2>
+        </div>
+        <div className='taskbar-menu-list'>
+          {mainPrograms.map(program => <TaskBarMenuButton program={program} />)}
+          <hr />
+          <h2 className='taskbar-menu-item taskbar-all-programs'>
+            All programs ▶
+            <div className='taskbar-all-programs-list'>
+              {allPrograms.map(program => <TaskBarMenuButton program={program} />)}
+            </div>
+          </h2>
+        </div>
       </div>
-    </div>
-  </div>);
+    </div>);
+  }
+
+  function TaskBarMenuButton({ program }) {
+    const handler = () => openProgram(program);
+    return (<div className='taskbar-menu-item'>
+      <img className='taskbar-menu-item-icon' src={program.icon} alt={program.name + ' icon'} />
+      <h2 className='taskbar-menu-item-label' onClick={handler}>{program.name}</h2>
+    </div>);
+  }
+
+  function TaskbarButton({ process }) {
+    const handler = () => focusWindow(process.id);
+    return <button className='taskbar-window' onClick={handler}>
+      <img className='taskbar-window-icon' src={process.icon} alt={process.name + ' icon'} />
+      {process.name}
+    </button>;
+  }
 }
 
-function TaskBarMenuButton({ program }) {
-  const handler = () => openProgramG(program);
-  return (<div className='taskbar-menu-item'>
-    <img className='taskbar-menu-item-icon' src={program.icon} />
-    <h2 className='taskbar-menu-item-label' onClick={handler}>{program.name}</h2>
-  </div>);
-}
-
-function TaskbarButton({ process, focusWindow, toggleMinimizeWindow }) {
-  const handler = () => focusWindow(process.id);
-  return <button className='taskbar-window' onClick={handler}>
-    <img className='taskbar-window-icon' src={process.icon} />
-    {process.name}
-  </button>;
-}
-
-function Window({ process, focusWindow, toggleMinimizeWindow, closeWindow, focus }) {
+function Window({ process, focusWindow, minimizeWindow, closeWindow, focus }) {
   React.useEffect(() => { console.log('test'); focusWindow(process.id) }, []);
   const [x, setX] = React.useState(Math.floor(Math.random() * 100));
   const [y, setY] = React.useState(Math.floor(Math.random() * 100));
@@ -161,14 +182,14 @@ function Window({ process, focusWindow, toggleMinimizeWindow, closeWindow, focus
   };
   const dragEndHandler = e => e.preventDefault();
   const focusHandler = () => focusWindow(process.id);
-  const minimizeHandler = () => toggleMinimizeWindow(process.id);
+  const minimizeHandler = () => minimizeWindow(process.id);
   const fullScreenHandler = () => setIsFullScreen(!isFullScreen);
   const closeHandler = () => closeWindow(process.id);
 
   return (
     <div className='window-container' style={{ top: isFullScreen ? 0 : y, left: isFullScreen ? 0 : x, width: isFullScreen ? '100%' : process.width, height: isFullScreen ? '100%' : process.height, zIndex: process.zIndex, display: process.zIndex < 0 && 'none' }}>
       <div className='window' style={{ position: 'relative', width: isFullScreen ? '100%' : process.width, height: isFullScreen ? '100%' : process.height, resize: !isFullScreen && 'both' }}>
-        {process != focus && <div onClick={focusHandler} style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}></div>}
+        {process !== focus && <div onClick={focusHandler} style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}></div>}
         <div className='window-header'>
           <div className='window-name' style={{ position: 'relative' }}>
             <div
@@ -181,7 +202,7 @@ function Window({ process, focusWindow, toggleMinimizeWindow, closeWindow, focus
               onDragOver={dragEndHandler}
               style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}
             ></div>
-            <img className='window-icon' src={process.icon} />
+            <img className='window-icon' src={process.icon} alt={process.name + ' icon'} />
             <span className='window-name'>{process.name}</span>
           </div>
           <button className='window-button' onClick={minimizeHandler}>_</button>
@@ -213,21 +234,24 @@ function ProjectsPage() {
   </div>);
 }
 function ContactPage() {
-  const [name, setName] = React.useState('');
-  const [comment, setComment] = React.useState('');
+  const [responseStatus, setResponseStatus] = React.useState({ pending: false, msg: "", color: "black" });
   const formHandler = e => {
     e.preventDefault();
-    console.log(e);
+    setResponseStatus({ pending: true, msg: "Sending your request...", color: "grey" });
+    emailjs
+      .sendForm('service_ggdcnj8', 'template_of1jj36', e.target, {
+        publicKey: 'giDAa8XFsxbR1cnKr',
+      })
+      .then(
+        () => {
+          setResponseStatus({ pending: false, msg: "Your request has been sent!", color: "green" });
+        },
+        (error) => {
+          setResponseStatus({ pending: false, msg: "Error! There is a problem in sending your request", color: "red" });
+        },
+      );
   }
-  const nameHandler = e => {
-    setName(e.target.value);
-    console.log(name);
-  }
-  const commentHandler = e => {
-    setComment(e.target.value);
-    console.log(comment);
-  }
-  return (<div style={{ padding: 10 }}>
+  return (<div style={{ padding: 20 }}>
     <h1>Contact Me By</h1>
     <div className='contact-main'>
       <div className='contact-info-container'>
@@ -236,13 +260,14 @@ function ContactPage() {
         <p>PUT LINKS TO linkedIn, gitHub...</p>
       </div>
       <div className='contact-form-container'>
-        <h2>Or send a message to me:</h2>
+        <h2>Or send a request from here:</h2>
         <form className='contact-form' onSubmit={formHandler}>
           <label>Send a request</label>
-          <input className='contact-name' style={{ width: '100%' }} placeholder='Your name' onChange={nameHandler}></input>
-          <textarea className='contact-comment' style={{ width: '100%', resize: 'none' }} placeholder='Your request comment' onChange={commentHandler}></textarea>
-          <button style={{ alignSelf: 'start' }}>Submit</button>
+          <input required name='from_name' className='contact-name' style={{ width: '100%' }} placeholder='Your name'></input>
+          <textarea required name='message' className='contact-comment' style={{ width: '100%', resize: 'none' }} placeholder='Your request comment'></textarea>
+          <button disabled={responseStatus.pending} style={{ alignSelf: 'start' }}>Submit</button>
         </form>
+        <p style={{ color: responseStatus.color }}>{responseStatus.msg}</p>
       </div>
     </div>
   </div>);
@@ -259,55 +284,6 @@ function Notepad() {
     </div>
     <textarea style={{ flexGrow: 1, resize: 'none' }}></textarea>
   </div>);
-}
-function Test() {
-  const array = [1, 2, 3, 4, 5, 6];
-  var target, animationEndTarget;
-  const clickHandler = event => {
-    if (target) target.parentElement.classList.remove('card-clicked');
-    target = event.target;
-    event.target.parentElement.classList.add('card-clicked');
-  }
-  const animationEndHandler = event => {
-    if (animationEndTarget) animationEndTarget.classList.remove('test');
-    animationEndTarget = event.target;
-    event.target.classList.add('test');
-  }
-  return (
-    <div>
-      <Deck array={array} clickHandler={clickHandler} animationEndHandler={animationEndHandler} />
-    </div>
-  );
-}
-
-function Deck({ array, clickHandler, animationEndHandler }) {
-  return <div className='deck'>
-    {array.map((v, i, a) => {
-      return (
-        <Card
-          name={v}
-          description={'This is a card...'}
-          zIndex={a.length - i}
-          clickHandler={clickHandler}
-          animationEndHandler={animationEndHandler} />
-      );
-    })}
-  </div>;
-}
-
-function Card({ name, description, clickHandler, animationEndHandler, zIndex }) {
-  // const h=event=>{event.target.classList.add('test');}
-  return (
-    <div style={{ zIndex: zIndex }} className='card-container' onAnimationEnd={animationEndHandler}>
-      <div className='card-click-area' onClick={clickHandler}></div>
-      <div className='card'>
-        <h1>{name}</h1>
-        <p className='card-description'>
-          {description}
-        </p>
-      </div>
-    </div>
-  );
 }
 
 export default App;
