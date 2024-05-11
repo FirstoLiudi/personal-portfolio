@@ -25,16 +25,20 @@ const allPrograms = [
   { name: 'Notepad', icon: notepad_icon, content: <Notepad />, width: '60vw', height: '70vh' },
 ];
 
+var openProgramGlobal;
+var focusWindowGlobal;
+
 function App() {
   const [processes, setProcesses] = React.useState([]);
   const [focus, setFocus] = React.useState({});
+
+  function getMaxZIndex() { return Math.max(...processes.map(p => p.zIndex ? p.zIndex : 0)); }
   const openProgram = program => {
     const lastProgram = processes[processes.length - 1];
     const newId = lastProgram ? lastProgram.id + 1 : 0;
     const process = { ...program, name: program.name || newId, id: newId };
     setProcesses([...processes, process]);
   };
-  function getMaxZIndex() { return Math.max(...processes.map(p => p.zIndex ? p.zIndex : 0)); }
   const focusWindow = pId => {
     setProcesses(processes.map(p => p.id === pId ? { ...p, zIndex: getMaxZIndex() + 1 } : p));
   };
@@ -44,26 +48,31 @@ function App() {
   const closeWindow = pId => {
     setProcesses(processes.filter(p => p.id !== pId));
   };
+
+  openProgramGlobal = openProgram;
+  focusWindowGlobal = focusWindow;
+
   React.useEffect(() => {
     const maxZIndex = getMaxZIndex();
     setFocus(processes.find(p => p.zIndex === maxZIndex));
   }, [processes]);
+
   return (
     <div className="App" style={{ backgroundImage: 'url("' + wallpaper + '")', backgroundSize: '100% 100%' }}>
       <div className='work-area'>
-        <FloatingApps programs={allPrograms} openProgram={openProgram} />
+        <FloatingApps programs={allPrograms} />
         {
           processes.map(process => {
             return <Window key={process.id} process={process} focusWindow={focusWindow} minimizeWindow={minimizeWindow} closeWindow={closeWindow} focus={focus} />;
           })
         }
       </div>
-      <Taskbar username={'Firsto'} processes={processes} openProgram={openProgram} focusWindow={focusWindow} />
+      <Taskbar username={'Firsto'} processes={processes} />
     </div>
   );
 }
 
-function FloatingApps({ programs, openProgram }) {
+function FloatingApps({ programs }) {
   return (
     <div className='floating-app-space'>
       {
@@ -73,17 +82,17 @@ function FloatingApps({ programs, openProgram }) {
       }
     </div>
   );
-
-  function FloatingApp({ app }) {
-    const clickHandler = () => openProgram(app);
-    return <div className='floating-app' onDoubleClick={clickHandler}>
-      <img className='floating-app-icon' src={app.icon} alt={app.name + ' icon'} />
-      <span className='floating-app-label'>{app.name}</span>
-    </div>;
-  }
 }
 
-function Taskbar({ username, processes, focusWindow, openProgram }) {
+function FloatingApp({ app }) {
+  const clickHandler = () => openProgramGlobal(app);
+  return <div className='floating-app' onDoubleClick={clickHandler}>
+    <img className='floating-app-icon' src={app.icon} alt={app.name + ' icon'} />
+    <span className='floating-app-label'>{app.name}</span>
+  </div>;
+}
+
+function Taskbar({ username, processes }) {
   return <div className='taskbar'>
     <TaskbarMenu username={username} />
     <div className='taskbar-window-list'>
@@ -95,63 +104,63 @@ function Taskbar({ username, processes, focusWindow, openProgram }) {
     </div>
     <TaskbarClock />
   </div>;
+}
 
-  function TaskbarClock() {
-    function getCurrentTime() {
-      const date = new Date();
-      const h = date.getHours();
-      const m = date.getMinutes().toString().padStart(2, '0');
-      const s = date.getSeconds().toString().padStart(2, '0');
-      return `${h % 12}:${m}:${s} ${h < 12 ? 'AM' : 'PM'}`;
-    }
-    const [time, setTime] = React.useState(getCurrentTime());
-    React.useEffect(() => {
-      setInterval(() => setTime(getCurrentTime), 1000);
-    }, []);
-    return (
-      <div className='taskbar-clock'>
-        <span>{time}</span>
+function TaskbarClock() {
+  function getCurrentTime() {
+    const date = new Date();
+    const h = date.getHours();
+    const m = date.getMinutes().toString().padStart(2, '0');
+    const s = date.getSeconds().toString().padStart(2, '0');
+    return `${h % 12}:${m}:${s} ${h < 12 ? 'AM' : 'PM'}`;
+  }
+  const [time, setTime] = React.useState(getCurrentTime());
+  React.useEffect(() => {
+    setInterval(() => setTime(getCurrentTime), 1000);
+  }, []);
+  return (
+    <div className='taskbar-clock'>
+      <span>{time}</span>
+    </div>
+  );
+}
+
+function TaskbarMenu({ username }) {
+  return (<div className='taskbar-start-menu'>
+    <img className='taskbar-start' src={taskbar_start_icon} alt='start button' />
+    <div className='taskbar-menu'>
+      <div className='taskbar-menu-user'>
+        <img src={user_icon} className='taskbar-menu-user-icon' alt='user icon' />
+        <h2 className='taskbar-menu-user-name'>{username}</h2>
       </div>
-    );
-  }
-
-  function TaskbarMenu({ username }) {
-    return (<div className='taskbar-start-menu'>
-      <img className='taskbar-start' src={taskbar_start_icon} alt='start button' />
-      <div className='taskbar-menu'>
-        <div className='taskbar-menu-user'>
-          <img src={user_icon} className='taskbar-menu-user-icon' alt='user icon' />
-          <h2 className='taskbar-menu-user-name'>{username}</h2>
-        </div>
-        <div className='taskbar-menu-list'>
-          {mainPrograms.map(program => <TaskBarMenuButton program={program} />)}
-          <hr />
-          <h2 className='taskbar-menu-item taskbar-all-programs'>
-            All programs ▶
-            <div className='taskbar-all-programs-list'>
-              {allPrograms.map(program => <TaskBarMenuButton program={program} />)}
-            </div>
-          </h2>
-        </div>
+      <div className='taskbar-menu-list'>
+        {mainPrograms.map(program => <TaskBarMenuButton program={program} />)}
+        <hr />
+        <h2 className='taskbar-menu-item taskbar-all-programs'>
+          All programs ▶
+          <div className='taskbar-all-programs-list'>
+            {allPrograms.map(program => <TaskBarMenuButton program={program} />)}
+          </div>
+        </h2>
       </div>
-    </div>);
-  }
+    </div>
+  </div>);
+}
 
-  function TaskBarMenuButton({ program }) {
-    const handler = () => openProgram(program);
-    return (<div className='taskbar-menu-item'>
-      <img className='taskbar-menu-item-icon' src={program.icon} alt={program.name + ' icon'} />
-      <h2 className='taskbar-menu-item-label' onClick={handler}>{program.name}</h2>
-    </div>);
-  }
+function TaskBarMenuButton({ program }) {
+  const handler = () => openProgramGlobal(program);
+  return (<div className='taskbar-menu-item'>
+    <img className='taskbar-menu-item-icon' src={program.icon} alt={program.name + ' icon'} />
+    <h2 className='taskbar-menu-item-label' onClick={handler}>{program.name}</h2>
+  </div>);
+}
 
-  function TaskbarButton({ process }) {
-    const handler = () => focusWindow(process.id);
-    return <button className='taskbar-window' onClick={handler}>
-      <img className='taskbar-window-icon' src={process.icon} alt={process.name + ' icon'} />
-      {process.name}
-    </button>;
-  }
+function TaskbarButton({ process }) {
+  const handler = () => focusWindowGlobal(process.id);
+  return <button className='taskbar-window' onClick={handler}>
+    <img className='taskbar-window-icon' src={process.icon} alt={process.name + ' icon'} />
+    {process.name}
+  </button>;
 }
 
 function Window({ process, focusWindow, minimizeWindow, closeWindow, focus }) {
