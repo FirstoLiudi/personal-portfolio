@@ -86,8 +86,14 @@ function Window({ process, focusWindow, minimizeWindow, closeWindow, focus }) {
   const [y, setY] = React.useState(Math.floor(Math.random() * 100));
   const [dx, setDx] = React.useState(0);
   const [dy, setDy] = React.useState(0);
+  const [w,setW]=React.useState(process.width);
+  const [h,setH]=React.useState(process.height);
   const [isFullScreen, setIsFullScreen] = React.useState(false);
 
+  const resizeHandler=e=>{
+    setW(e.changedTouches[0].clientX - x);
+    setH(e.changedTouches[0].clientY - y);
+  }
   const dragStartHandler = e => {
     focusWindow(process.id);
     setDx(e.clientX - x);
@@ -113,9 +119,10 @@ function Window({ process, focusWindow, minimizeWindow, closeWindow, focus }) {
   const closeHandler = () => closeWindow(process.id);
 
   return (
-    <div className='window-container' style={{ top: isFullScreen ? 0 : y, left: isFullScreen ? 0 : x, width: isFullScreen ? '100%' : process.width, height: isFullScreen ? '100%' : process.height, zIndex: process.zIndex, display: process.zIndex < 0 && 'none' }}>
-      <div className='window' style={{ position: 'relative', width: isFullScreen ? '100%' : process.width, height: isFullScreen ? '100%' : process.height, resize: !isFullScreen && 'both' }}>
+    <div className='window-container' style={{ top: isFullScreen ? 0 : y, left: isFullScreen ? 0 : x, width: isFullScreen ? '100%' : w, height: isFullScreen ? '100%' : h, zIndex: process.zIndex, display: process.zIndex < 0 && 'none' }}>
+      <div className='window' style={{ position: 'relative', width: isFullScreen ? '100%' : w, height: isFullScreen ? '100%' : h, resize: !isFullScreen && 'both' }}>
         {process !== focus && <div onClick={focusHandler} style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}></div>}
+        <div onTouchMove={resizeHandler} style={{ position: 'absolute', bottom: 0, right: 0, height: 10, width: 10, backgroundColor:'red' }}></div>
         <div className='window-header'>
           <div className='window-name' style={{ position: 'relative' }}>
             <div
@@ -293,7 +300,7 @@ function InternetExplorer() {
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
       <form onSubmit={goToWebsite} style={{ display: 'flex' }}>
-        <input name='url' placeholder='Enter website address' style={{ flexGrow: 1 }} />
+        <input name='url' placeholder='Enter website address' style={{ flex: '1 1', minWidth: 0 }} />
         <button>Go</button>
       </form>
       <Iframe url={url} styles={{ flexGrow: 1, overflowY: 'scroll' }} />
