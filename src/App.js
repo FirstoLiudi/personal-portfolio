@@ -291,10 +291,9 @@ function InternetExplorer() {
     setUrl(url);
   }
   return (
-    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection:'column' }}>
+    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
       <form onSubmit={goToWebsite} style={{ display: 'flex' }}>
-        <label style={{paddingInline:5}}>Address</label>
-        <input name='url' style={{ flexGrow:1 }} />
+        <input name='url' placeholder='Enter website address' style={{ flexGrow: 1 }} />
         <button>Go</button>
       </form>
       <Iframe url={url} styles={{ flexGrow: 1, overflowY: 'scroll' }} />
