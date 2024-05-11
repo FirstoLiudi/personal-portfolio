@@ -12,6 +12,9 @@ body {
   flex-direction: column;
   width: 100%;
   height: 100%;
+  /* backgroundImage: 'url("' + wallpaper + '")', backgroundSize: '100% 100%' */
+  background-image: url('./img/wallpaper.webp');
+  background-size: 100% 100%;
 }
 
 @font-face {

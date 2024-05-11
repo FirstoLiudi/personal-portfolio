@@ -1,27 +1,25 @@
-import wallpaper from './img/wallpaper.webp';
 import user_icon from './img/user-icon.jpeg';
 import home_icon from './img/icon-home.png';
 import about_icon from './img/icon-about.png';
 import folder_icon from './img/icon-folder.ico';
 import contact_icon from './img/icon-contact.png';
+import internet_explorer_icon from './img/icon-internet-explorer.png';
 import notepad_icon from './img/icon-notepad.png';
 import taskbar_start_icon from './img/icon-taskbar-start.jpeg';
 import './App.css';
 import emailjs from '@emailjs/browser';
 import React from 'react';
+import Iframe from 'react-iframe';
 
 const mainPrograms = [
   { name: 'Home', icon: home_icon, content: <HomePage />, width: '60vw', height: '70vh' },
   { name: 'About', icon: about_icon, content: <AboutPage />, width: '60vw', height: '70vh' },
   { name: 'Projects', icon: folder_icon, content: <ProjectsPage />, width: '60vw', height: '70vh' },
   { name: 'Contact', icon: contact_icon, content: <ContactPage />, width: '60vw', height: '70vh' },
-  { name: 'Notepad', icon: notepad_icon, content: <Notepad />, width: '60vw', height: '70vh' },
+  { name: 'Internet Explorer', icon: internet_explorer_icon, content: <InternetExplorer />, width: '60vw', height: '70vh' },
 ];
 const allPrograms = [
-  { name: 'Home', icon: home_icon, content: <HomePage />, width: '60vw', height: '70vh' },
-  { name: 'About', icon: about_icon, content: <AboutPage />, width: '60vw', height: '70vh' },
-  { name: 'Projects', icon: folder_icon, content: <ProjectsPage />, width: '60vw', height: '70vh' },
-  { name: 'Contact', icon: contact_icon, content: <ContactPage />, width: '60vw', height: '70vh' },
+  ...mainPrograms,
   { name: 'Notepad', icon: notepad_icon, content: <Notepad />, width: '60vw', height: '70vh' },
 ];
 
@@ -36,14 +34,14 @@ function App() {
   const openProgram = program => {
     const lastProgram = processes[processes.length - 1];
     const newId = lastProgram ? lastProgram.id + 1 : 0;
-    const process = { ...program, name: program.name || newId, id: newId };
+    const process = { ...program, id: newId };
     setProcesses([...processes, process]);
   };
   const focusWindow = pId => {
     setProcesses(processes.map(p => p.id === pId ? { ...p, zIndex: getMaxZIndex() + 1 } : p));
   };
   const minimizeWindow = pId => {
-    setProcesses(processes.map(p => p.id === pId ? { ...p, zIndex: p.zIndex < 0 ? getMaxZIndex() + 1 : -1 } : p));
+    setProcesses(processes.map(p => p.id === pId ? { ...p, zIndex: -1 } : p));
   };
   const closeWindow = pId => {
     setProcesses(processes.filter(p => p.id !== pId));
@@ -58,28 +56,18 @@ function App() {
   }, [processes]);
 
   return (
-    <div className="App" style={{ backgroundImage: 'url("' + wallpaper + '")', backgroundSize: '100% 100%' }}>
+    <div className="App">
       <div className='work-area'>
-        <FloatingApps programs={allPrograms} />
+        <div className='floating-app-space'>
+          {allPrograms.map(program => <FloatingApp app={program} />)}
+        </div>
         {
-          processes.map(process => {
-            return <Window key={process.id} process={process} focusWindow={focusWindow} minimizeWindow={minimizeWindow} closeWindow={closeWindow} focus={focus} />;
-          })
+          processes.map(process =>
+            <Window key={process.id} process={process} focusWindow={focusWindow} minimizeWindow={minimizeWindow} closeWindow={closeWindow} focus={focus} />
+          )
         }
       </div>
       <Taskbar username={'Firsto'} processes={processes} />
-    </div>
-  );
-}
-
-function FloatingApps({ programs }) {
-  return (
-    <div className='floating-app-space'>
-      {
-        programs.map(program => {
-          return <FloatingApp app={program} />;
-        })
-      }
     </div>
   );
 }
@@ -90,6 +78,67 @@ function FloatingApp({ app }) {
     <img className='floating-app-icon' src={app.icon} alt={app.name + ' icon'} />
     <span className='floating-app-label'>{app.name}</span>
   </div>;
+}
+
+function Window({ process, focusWindow, minimizeWindow, closeWindow, focus }) {
+  React.useEffect(() => { console.log('test'); focusWindow(process.id) }, []);
+  const [x, setX] = React.useState(Math.floor(Math.random() * 100));
+  const [y, setY] = React.useState(Math.floor(Math.random() * 100));
+  const [dx, setDx] = React.useState(0);
+  const [dy, setDy] = React.useState(0);
+  const [isFullScreen, setIsFullScreen] = React.useState(false);
+
+  const dragStartHandler = e => {
+    focusWindow(process.id);
+    setDx(e.clientX - x);
+    setDy(e.clientY - y);
+  };
+  const touchStartHandler = e => {
+    focusWindow(process.id);
+    setDx(e.changedTouches[0].clientX - x);
+    setDy(e.changedTouches[0].clientY - y);
+  };
+  const dragHandler = e => {
+    setX(e.clientX - dx);
+    setY(e.clientY - dy);
+  };
+  const touchMoveHandler = e => {
+    setX(e.changedTouches[0].clientX - dx);
+    setY(e.changedTouches[0].clientY - dy);
+  };
+  const dragEndHandler = e => e.preventDefault();
+  const focusHandler = () => focusWindow(process.id);
+  const minimizeHandler = () => minimizeWindow(process.id);
+  const fullScreenHandler = () => setIsFullScreen(!isFullScreen);
+  const closeHandler = () => closeWindow(process.id);
+
+  return (
+    <div className='window-container' style={{ top: isFullScreen ? 0 : y, left: isFullScreen ? 0 : x, width: isFullScreen ? '100%' : process.width, height: isFullScreen ? '100%' : process.height, zIndex: process.zIndex, display: process.zIndex < 0 && 'none' }}>
+      <div className='window' style={{ position: 'relative', width: isFullScreen ? '100%' : process.width, height: isFullScreen ? '100%' : process.height, resize: !isFullScreen && 'both' }}>
+        {process !== focus && <div onClick={focusHandler} style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}></div>}
+        <div className='window-header'>
+          <div className='window-name' style={{ position: 'relative' }}>
+            <div
+              draggable={!isFullScreen ? 'true' : 'false'}
+              onDragStart={dragStartHandler}
+              onTouchStart={touchStartHandler}
+              onDrag={dragHandler}
+              onTouchMove={touchMoveHandler}
+              onDragEnd={dragEndHandler}
+              onDragOver={dragEndHandler}
+              style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}
+            ></div>
+            <img className='window-icon' src={process.icon} alt={process.name + ' icon'} />
+            <span className='window-name'>{process.name}</span>
+          </div>
+          <button className='window-button' onClick={minimizeHandler}>_</button>
+          <button className='window-button' onClick={fullScreenHandler}>■</button>
+          <button className='window-close-button' onClick={closeHandler}>x</button>
+        </div>
+        <div className='window-main'>{process.content}</div>
+      </div>
+    </div>
+  );
 }
 
 function Taskbar({ username, processes }) {
@@ -163,67 +212,6 @@ function TaskbarButton({ process }) {
   </button>;
 }
 
-function Window({ process, focusWindow, minimizeWindow, closeWindow, focus }) {
-  React.useEffect(() => { console.log('test'); focusWindow(process.id) }, []);
-  const [x, setX] = React.useState(Math.floor(Math.random() * 100));
-  const [y, setY] = React.useState(Math.floor(Math.random() * 100));
-  const [dx, setDx] = React.useState(0);
-  const [dy, setDy] = React.useState(0);
-  const [isFullScreen, setIsFullScreen] = React.useState(false);
-
-  const dragStartHandler = e => {
-    focusWindow(process.id);
-    setDx(e.clientX - x);
-    setDy(e.clientY - y);
-  };
-  const touchStartHandler = e => {
-    focusWindow(process.id);
-    setDx(e.changedTouches[0].clientX - x);
-    setDy(e.changedTouches[0].clientY - y);
-  };
-  const dragHandler = e => {
-    setX(e.clientX - dx);
-    setY(e.clientY - dy);
-  };
-  const touchMoveHandler = e => {
-    setX(e.changedTouches[0].clientX - dx);
-    setY(e.changedTouches[0].clientY - dy);
-  };
-  const dragEndHandler = e => e.preventDefault();
-  const focusHandler = () => focusWindow(process.id);
-  const minimizeHandler = () => minimizeWindow(process.id);
-  const fullScreenHandler = () => setIsFullScreen(!isFullScreen);
-  const closeHandler = () => closeWindow(process.id);
-
-  return (
-    <div className='window-container' style={{ top: isFullScreen ? 0 : y, left: isFullScreen ? 0 : x, width: isFullScreen ? '100%' : process.width, height: isFullScreen ? '100%' : process.height, zIndex: process.zIndex, display: process.zIndex < 0 && 'none' }}>
-      <div className='window' style={{ position: 'relative', width: isFullScreen ? '100%' : process.width, height: isFullScreen ? '100%' : process.height, resize: !isFullScreen && 'both' }}>
-        {process !== focus && <div onClick={focusHandler} style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}></div>}
-        <div className='window-header'>
-          <div className='window-name' style={{ position: 'relative' }}>
-            <div
-              draggable={!isFullScreen ? 'true' : 'false'}
-              onDragStart={dragStartHandler}
-              onTouchStart={touchStartHandler}
-              onDrag={dragHandler}
-              onTouchMove={touchMoveHandler}
-              onDragEnd={dragEndHandler}
-              onDragOver={dragEndHandler}
-              style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}
-            ></div>
-            <img className='window-icon' src={process.icon} alt={process.name + ' icon'} />
-            <span className='window-name'>{process.name}</span>
-          </div>
-          <button className='window-button' onClick={minimizeHandler}>_</button>
-          <button className='window-button' onClick={fullScreenHandler}>■</button>
-          <button className='window-close-button' onClick={closeHandler}>x</button>
-        </div>
-        <div className='window-main'>{process.content}</div>
-      </div>
-    </div>
-  );
-}
-
 function HomePage() {
   return (<div style={{ padding: 10 }}>
     <h1>Hello</h1>
@@ -293,6 +281,25 @@ function Notepad() {
     </div>
     <textarea style={{ flexGrow: 1, resize: 'none' }}></textarea>
   </div>);
+}
+
+function InternetExplorer() {
+  const [url, setUrl] = React.useState('');
+  const goToWebsite = e => {
+    e.preventDefault();
+    const url = new FormData(e.target).get('url');
+    setUrl(url);
+  }
+  return (
+    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection:'column' }}>
+      <form onSubmit={goToWebsite} style={{ display: 'flex' }}>
+        <label style={{paddingInline:5}}>Address</label>
+        <input name='url' style={{ flexGrow:1 }} />
+        <button>Go</button>
+      </form>
+      <Iframe url={url} styles={{ flexGrow: 1, overflowY: 'scroll' }} />
+    </div>
+  );
 }
 
 export default App;
