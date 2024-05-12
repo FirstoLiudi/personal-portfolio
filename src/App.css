@@ -36,7 +36,7 @@ div,p,button,span,textarea,input{
   padding: 10px;
 }
 
-.floating-app-space {
+.desktop-icon-space {
   display: grid;
   grid-auto-flow: column;
   grid-template-columns: repeat(auto-fill, 80px);
@@ -44,7 +44,7 @@ div,p,button,span,textarea,input{
   width: 100%;
   height: 100%;
 
-  .floating-app {
+  .desktop-icon {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -53,19 +53,19 @@ div,p,button,span,textarea,input{
     padding: 5px;
     margin: auto;
 
-    .floating-app-icon {
+    .desktop-icon-icon {
       width: 35px;
       height: 35px;
     }
 
-    .floating-app-label {
+    .desktop-icon-label {
       text-align: center;
       color: white;
       text-shadow: 1px 1px black, -1px -1px black, 1px -1px black, -1px 1px black;
     }
   }
 
-  .floating-app:hover {
+  .desktop-icon:hover {
     background-color: rgba(65, 105, 225, 0.3)
   }
 }

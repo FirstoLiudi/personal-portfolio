@@ -25,6 +25,8 @@ const allPrograms = [
 
 var openProgramGlobal;
 var focusWindowGlobal;
+var minimizeWindowGlobal;
+var closeWindowGlobal;
 
 function App() {
   const [processes, setProcesses] = React.useState([]);
@@ -49,6 +51,8 @@ function App() {
 
   openProgramGlobal = openProgram;
   focusWindowGlobal = focusWindow;
+  minimizeWindowGlobal = minimizeWindow;
+  closeWindowGlobal = closeWindow;
 
   React.useEffect(() => {
     const maxZIndex = getMaxZIndex();
@@ -58,12 +62,12 @@ function App() {
   return (
     <div className="App">
       <div className='work-area'>
-        <div className='floating-app-space'>
-          {allPrograms.map(program => <FloatingApp app={program} />)}
+        <div className='desktop-icon-space'>
+          {allPrograms.map(program => <DesktopIcon program={program} />)}
         </div>
         {
           processes.map(process =>
-            <Window key={process.id} process={process} focusWindow={focusWindow} minimizeWindow={minimizeWindow} closeWindow={closeWindow} focus={focus} />
+            <Window key={process.id} process={process} focus={focus} />
           )
         }
       </div>
@@ -72,35 +76,35 @@ function App() {
   );
 }
 
-function FloatingApp({ app }) {
-  const clickHandler = () => openProgramGlobal(app);
-  return <div className='floating-app' onDoubleClick={clickHandler}>
-    <img className='floating-app-icon' src={app.icon} alt={app.name + ' icon'} />
-    <span className='floating-app-label'>{app.name}</span>
+function DesktopIcon({ program }) {
+  const clickHandler = () => openProgramGlobal(program);
+  return <div className='desktop-icon' onDoubleClick={clickHandler}>
+    <img className='desktop-icon-icon' src={program.icon} alt={program.name + ' icon'} />
+    <span className='desktop-icon-label'>{program.name}</span>
   </div>;
 }
 
-function Window({ process, focusWindow, minimizeWindow, closeWindow, focus }) {
-  React.useEffect(() => { console.log('test'); focusWindow(process.id) }, []);
+function Window({ process, focus }) {
+  React.useEffect(() => focusWindowGlobal(process.id), []);
   const [x, setX] = React.useState(Math.floor(Math.random() * 100));
   const [y, setY] = React.useState(Math.floor(Math.random() * 100));
   const [dx, setDx] = React.useState(0);
   const [dy, setDy] = React.useState(0);
-  const [w,setW]=React.useState(process.width);
-  const [h,setH]=React.useState(process.height);
+  const [w, setW] = React.useState(process.width);
+  const [h, setH] = React.useState(process.height);
   const [isFullScreen, setIsFullScreen] = React.useState(false);
 
-  const resizeHandler=e=>{
+  const resizeHandler = e => {
     setW(e.changedTouches[0].clientX - x);
     setH(e.changedTouches[0].clientY - y);
   }
   const dragStartHandler = e => {
-    focusWindow(process.id);
+    focusWindowGlobal(process.id);
     setDx(e.clientX - x);
     setDy(e.clientY - y);
   };
-  const touchStartHandler = e => {
-    focusWindow(process.id);
+  const dragStartMobileHandler = e => {
+    focusWindowGlobal(process.id);
     setDx(e.changedTouches[0].clientX - x);
     setDy(e.changedTouches[0].clientY - y);
   };
@@ -108,15 +112,15 @@ function Window({ process, focusWindow, minimizeWindow, closeWindow, focus }) {
     setX(e.clientX - dx);
     setY(e.clientY - dy);
   };
-  const touchMoveHandler = e => {
+  const dragMobileHandler = e => {
     setX(e.changedTouches[0].clientX - dx);
     setY(e.changedTouches[0].clientY - dy);
   };
   const dragEndHandler = e => e.preventDefault();
-  const focusHandler = () => focusWindow(process.id);
-  const minimizeHandler = () => minimizeWindow(process.id);
+  const focusHandler = () => focusWindowGlobal(process.id);
+  const minimizeHandler = () => minimizeWindowGlobal(process.id);
   const fullScreenHandler = () => setIsFullScreen(!isFullScreen);
-  const closeHandler = () => closeWindow(process.id);
+  const closeHandler = () => closeWindowGlobal(process.id);
 
   return (
     <div className='window-container' style={{ top: isFullScreen ? 0 : y, left: isFullScreen ? 0 : x, width: isFullScreen ? '100%' : w, height: isFullScreen ? '100%' : h, zIndex: process.zIndex, display: process.zIndex < 0 && 'none' }}>
@@ -128,9 +132,9 @@ function Window({ process, focusWindow, minimizeWindow, closeWindow, focus }) {
             <div
               draggable={!isFullScreen ? 'true' : 'false'}
               onDragStart={dragStartHandler}
-              onTouchStart={touchStartHandler}
+              onTouchStart={dragStartMobileHandler}
               onDrag={dragHandler}
-              onTouchMove={touchMoveHandler}
+              onTouchMove={dragMobileHandler}
               onDragEnd={dragEndHandler}
               onDragOver={dragEndHandler}
               style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}
