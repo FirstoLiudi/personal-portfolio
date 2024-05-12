@@ -15,7 +15,7 @@ A website that tries to imitate Windows XP desktop
 - States
 	- processes (Array)
 		- An array of windows that are currently open (because a running program is called a process)
-		- The program (before running it into a process) are objects that are like in the mainPrograms (a global const) list below, where each program has their own component (in the content property)
+		- The program (before running it into a process) are objects that are like in the mainPrograms (a global const) list below, where each program has their own component (in the content property).
 	- focus (one of the process in processes)
 		- The window that is currently focused
 ```
@@ -25,11 +25,11 @@ function App() {
 ```
 ```
 const mainPrograms = [
-  { name: 'Home', icon: home_icon, content: <HomePage />, width: '60vw', height: '70vh' },
-  { name: 'About', icon: about_icon, content: <AboutPage />, width: '60vw', height: '70vh' },
-  { name: 'Projects', icon: folder_icon, content: <ProjectsPage />, width: '60vw', height: '70vh' },
-  { name: 'Contact', icon: contact_icon, content: <ContactPage />, width: '60vw', height: '70vh' },
-  { name: 'Internet Explorer', icon: internet_explorer_icon, content: <InternetExplorer />, width: '60vw', height: '70vh' },
+  { name: 'Home', icon: home_icon, content: <HomePage /> },
+  { name: 'About', icon: about_icon, content: <AboutPage /> },
+  { name: 'Projects', icon: folder_icon, content: <ProjectsPage /> },
+  { name: 'Contact', icon: contact_icon, content: <ContactPage /> },
+  { name: 'Internet Explorer', icon: internet_explorer_icon, content: <InternetExplorer /> },
 ];
 ```
 - Functions
@@ -177,11 +177,11 @@ function Window({ process, focus }) {
 	- To avoid this, I made an invisible div  that represents the click/drag area of the elements that uses some of the handlers above
 	- They are the HTML elements that have position:absolute in the styling (styling applied inline)
 ```
-return (
-    <div className='window-container' style={{ top: isFullScreen ? 0 : y, left: isFullScreen ? 0 : x, width: isFullScreen ? '100%' : w, height: isFullScreen ? '100%' : h, zIndex: process.zIndex, display: process.zIndex < 0 && 'none' }}>
+  return (
+    <div className='window-container' style={{ top: isFullScreen ? 0 : y, left: isFullScreen ? 0 : x, width: isFullScreen && '100%', height: isFullScreen && '100%', zIndex: process.zIndex, display: process.zIndex < 0 && 'none' }}>
       <div className='window' style={{ position: 'relative', width: isFullScreen ? '100%' : w, height: isFullScreen ? '100%' : h, resize: !isFullScreen && 'both' }}>
         {process !== focus && <div onClick={focusHandler} style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}></div>}
-        <div onTouchMove={resizeHandler} style={{ position: 'absolute', bottom: 0, right: 0, height: 10, width: 10 }}></div>
+        <div onTouchMove={resizeHandler} style={{ position: 'absolute', bottom: 0, right: 0, height: 20, width: 20 }}></div>
         <div className='window-header'>
           <div className='window-name' style={{ position: 'relative' }}>
             <div
