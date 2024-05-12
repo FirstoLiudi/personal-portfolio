@@ -12,15 +12,15 @@ import React from 'react';
 import Iframe from 'react-iframe';
 
 const mainPrograms = [
-  { name: 'Home', icon: home_icon, content: <HomePage />, width: '60vw', height: '70vh' },
-  { name: 'About', icon: about_icon, content: <AboutPage />, width: '60vw', height: '70vh' },
-  { name: 'Projects', icon: folder_icon, content: <ProjectsPage />, width: '60vw', height: '70vh' },
-  { name: 'Contact', icon: contact_icon, content: <ContactPage />, width: '60vw', height: '70vh' },
-  { name: 'Internet Explorer', icon: internet_explorer_icon, content: <InternetExplorer />, width: '60vw', height: '70vh' },
+  { name: 'Home', icon: home_icon, content: <HomePage /> },
+  { name: 'About', icon: about_icon, content: <AboutPage /> },
+  { name: 'Projects', icon: folder_icon, content: <ProjectsPage /> },
+  { name: 'Contact', icon: contact_icon, content: <ContactPage /> },
+  { name: 'Internet Explorer', icon: internet_explorer_icon, content: <InternetExplorer /> },
 ];
 const allPrograms = [
   ...mainPrograms,
-  { name: 'Notepad', icon: notepad_icon, content: <Notepad />, width: '60vw', height: '70vh' },
+  { name: 'Notepad', icon: notepad_icon, content: <Notepad /> },
 ];
 
 var openProgramGlobal;
@@ -90,8 +90,8 @@ function Window({ process, focus }) {
   const [y, setY] = React.useState(Math.floor(Math.random() * 100));
   const [dx, setDx] = React.useState(0);
   const [dy, setDy] = React.useState(0);
-  const [w, setW] = React.useState(process.width);
-  const [h, setH] = React.useState(process.height);
+  const [w, setW] = React.useState(null);
+  const [h, setH] = React.useState(null);
   const [isFullScreen, setIsFullScreen] = React.useState(false);
 
   const resizeHandler = e => {
@@ -195,13 +195,13 @@ function TaskbarMenu({ username }) {
       </div>
       <div className='taskbar-menu-list'>
         {mainPrograms.map(program => <TaskBarMenuButton program={program} />)}
-        <hr />
-        <h2 className='taskbar-menu-item taskbar-all-programs'>
-          All programs ▶
+        <hr className='taskbar-menu-line' />
+        <div className='taskbar-all-programs'>
+          <h2>All programs ▶</h2>
           <div className='taskbar-all-programs-list'>
             {allPrograms.map(program => <TaskBarMenuButton program={program} />)}
           </div>
-        </h2>
+        </div>
       </div>
     </div>
   </div>);
