@@ -123,10 +123,10 @@ function Window({ process, focus }) {
   const closeHandler = () => closeWindowGlobal(process.id);
 
   return (
-    <div className='window-container' style={{ top: isFullScreen ? 0 : y, left: isFullScreen ? 0 : x, width: isFullScreen ? '100%' : w, height: isFullScreen ? '100%' : h, zIndex: process.zIndex, display: process.zIndex < 0 && 'none' }}>
+    <div className='window-container' style={{ top: isFullScreen ? 0 : y, left: isFullScreen ? 0 : x, width: isFullScreen && '100%', height: isFullScreen && '100%', zIndex: process.zIndex, display: process.zIndex < 0 && 'none' }}>
       <div className='window' style={{ position: 'relative', width: isFullScreen ? '100%' : w, height: isFullScreen ? '100%' : h, resize: !isFullScreen && 'both' }}>
         {process !== focus && <div onClick={focusHandler} style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}></div>}
-        <div onTouchMove={resizeHandler} style={{ position: 'absolute', bottom: 0, right: 0, height: 10, width: 10 }}></div>
+        <div onTouchMove={resizeHandler} style={{ position: 'absolute', bottom: 0, right: 0, height: 20, width: 20 }}></div>
         <div className='window-header'>
           <div className='window-name' style={{ position: 'relative' }}>
             <div
