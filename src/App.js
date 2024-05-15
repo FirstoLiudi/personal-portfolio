@@ -11,6 +11,7 @@ import emailjs from '@emailjs/browser';
 import React from 'react';
 import Iframe from 'react-iframe';
 
+// the programs that is shown in the start menu
 const mainPrograms = [
   { name: 'Home', icon: home_icon, content: <HomePage /> },
   { name: 'About', icon: about_icon, content: <AboutPage /> },
@@ -18,21 +19,28 @@ const mainPrograms = [
   { name: 'Contact', icon: contact_icon, content: <ContactPage /> },
   { name: 'Internet Explorer', icon: internet_explorer_icon, content: <InternetExplorer /> },
 ];
+// all programs that will be shown in desktop and all programs
 const allPrograms = [
   ...mainPrograms,
   { name: 'Notepad', icon: notepad_icon, content: <Notepad /> },
 ];
 
+// functions for open/focus/minimize/close windows (defined in App component)
 var openProgramGlobal;
 var focusWindowGlobal;
 var minimizeWindowGlobal;
 var closeWindowGlobal;
 
 function App() {
+  // The array of running programs/windows
   const [processes, setProcesses] = React.useState([]);
+  // The top most window
   const [focus, setFocus] = React.useState({});
 
+  // returns the biggest z-index of the windows
   function getMaxZIndex() { return Math.max(...processes.map(p => p.zIndex ? p.zIndex : 0)); }
+
+  // functions for open/focus/minimize/close windows
   const openProgram = program => {
     const lastProgram = processes[processes.length - 1];
     const newId = lastProgram ? lastProgram.id + 1 : 0;
@@ -49,11 +57,13 @@ function App() {
     setProcesses(processes.filter(p => p.id !== pId));
   };
 
+  // passing the functions above to global variable (for easy access for other components)
   openProgramGlobal = openProgram;
   focusWindowGlobal = focusWindow;
   minimizeWindowGlobal = minimizeWindow;
   closeWindowGlobal = closeWindow;
 
+  // updates the focus window when a window is opened/closed/minimized
   React.useEffect(() => {
     const maxZIndex = getMaxZIndex();
     setFocus(processes.find(p => p.zIndex === maxZIndex));
@@ -76,6 +86,7 @@ function App() {
   );
 }
 
+// The floating icon in the desktop
 function DesktopIcon({ program }) {
   const clickHandler = () => openProgramGlobal(program);
   return <div className='desktop-icon' onDoubleClick={clickHandler}>
@@ -86,10 +97,13 @@ function DesktopIcon({ program }) {
 
 function Window({ process, focus }) {
   React.useEffect(() => focusWindowGlobal(process.id), []);
+  // the window's position (the top left corner of the window)
   const [x, setX] = React.useState(Math.floor(Math.random() * 100));
   const [y, setY] = React.useState(Math.floor(Math.random() * 100));
+  // (ONLY USED IN DRAGGING) the offset between the mouse/touchscreen pointer and the window's position
   const [dx, setDx] = React.useState(0);
   const [dy, setDy] = React.useState(0);
+  // the width/height of the window
   const [w, setW] = React.useState(null);
   const [h, setH] = React.useState(null);
   const [isFullScreen, setIsFullScreen] = React.useState(false);
@@ -103,6 +117,7 @@ function Window({ process, focus }) {
     setDx(e.clientX - x);
     setDy(e.clientY - y);
   };
+  // dragStartHandler but for mobile device (because CSS dragable is not available mobile)
   const dragStartMobileHandler = e => {
     focusWindowGlobal(process.id);
     setDx(e.changedTouches[0].clientX - x);
@@ -112,6 +127,7 @@ function Window({ process, focus }) {
     setX(e.clientX - dx);
     setY(e.clientY - dy);
   };
+  // dragHandler but for mobile device (because CSS dragable is not available mobile)
   const dragMobileHandler = e => {
     setX(e.changedTouches[0].clientX - dx);
     setY(e.changedTouches[0].clientY - dy);
@@ -152,6 +168,7 @@ function Window({ process, focus }) {
   );
 }
 
+// The bottom bar containing the start menu and tabs
 function Taskbar({ username, processes }) {
   return <div className='taskbar'>
     <TaskbarMenu username={username} />
@@ -166,6 +183,7 @@ function Taskbar({ username, processes }) {
   </div>;
 }
 
+// A clock displaying the time
 function TaskbarClock() {
   function getCurrentTime() {
     const date = new Date();
@@ -185,6 +203,7 @@ function TaskbarClock() {
   );
 }
 
+// The start menu
 function TaskbarMenu({ username }) {
   return (<div className='taskbar-start-menu'>
     <img className='taskbar-start' src={taskbar_start_icon} alt='start button' />
@@ -215,6 +234,7 @@ function TaskBarMenuButton({ program }) {
   </div>);
 }
 
+// The window tabs to unminimize the window
 function TaskbarButton({ process }) {
   const handler = () => focusWindowGlobal(process.id);
   return <button className='taskbar-window' onClick={handler}>
@@ -222,6 +242,8 @@ function TaskbarButton({ process }) {
     {process.name}
   </button>;
 }
+
+// Below are the program's contents
 
 function HomePage() {
   return (<div style={{ padding: 10 }}>
@@ -246,6 +268,7 @@ function ContactPage() {
   const formHandler = e => {
     e.preventDefault();
     setResponseStatus({ pending: true, msg: "Sending your request...", color: "grey" });
+    // using emailjs API to send me email (email details such as it's reciever are defined in the emailjs website)
     emailjs
       .sendForm('service_ggdcnj8', 'template_of1jj36', e.target, {
         publicKey: 'giDAa8XFsxbR1cnKr',
@@ -299,8 +322,11 @@ function InternetExplorer() {
   const goToWebsite = e => {
     e.preventDefault();
     const url = new FormData(e.target).get('url');
-    setUrl(url);
+    // Check url format (because Iframe needs 'http://' in front of the url)
+    if (url.includes('https://') || url.includes('http://')) setUrl(url);
+    else setUrl('http://'+url);
   }
+  // Iframe: a component that can view the website of the given url
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
       <form onSubmit={goToWebsite} style={{ display: 'flex' }}>
