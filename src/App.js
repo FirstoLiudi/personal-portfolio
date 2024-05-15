@@ -324,7 +324,7 @@ function InternetExplorer() {
     const url = new FormData(e.target).get('url');
     // Check url format (because Iframe needs 'http://' in front of the url)
     if (url.includes('https://') || url.includes('http://')) setUrl(url);
-    else setUrl('http://'+url);
+    else setUrl('https://'+url);
   }
   // Iframe: a component that can view the website of the given url
   return (
