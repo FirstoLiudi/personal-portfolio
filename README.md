@@ -1,13 +1,19 @@
+
 # My Personal Portfolio
 
 A website that tries to imitate Windows XP desktop
 
 ## Features
-- Windows XP features such as
+- Windows XP desktop features such as
 	- Open/Close/Fullscreen/Minimize/Resize windows
 	- Windows XP navigation (desktop icons, taskbar, menu)
 - Some imitations of Windows XP apps (not much currently, more coming soon)
 - A contact page (in the form of a window) to send a request to me
+
+## Technologies Used
+- React
+	- external libraries: emailjs and react-iframe
+- CSS
 
 ## Components
 ### App
@@ -231,3 +237,12 @@ function Taskbar({ username, processes }) {
   </div>;
 }
 ```
+### The programs
+- Currently, not much program has been added to the desktop. Since this is a personal portfolio, I added some things that most personal portfolios have as a program along with some imitations of windows XP apps such as:
+	- Home page
+	- About page
+	- Projects page
+	- Contact page
+		- You can send a message to me directly in this program
+	- Notepad
+	- Internet Explorer
