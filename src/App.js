@@ -8,8 +8,9 @@ import notepad_icon from './img/icon-notepad.png';
 import taskbar_start_icon from './img/icon-taskbar-start.jpeg';
 import './App.css';
 import emailjs from '@emailjs/browser';
-import React, { useCallback } from 'react';
+import React from 'react';
 import Iframe from 'react-iframe';
+import Draggable from 'react-draggable';
 
 // the programs that is shown in the start menu
 const mainPrograms = [
@@ -38,7 +39,7 @@ function App() {
   const [focus, setFocus] = React.useState({});
 
   // returns the biggest z-index of the windows
-  const getMaxZIndex=useCallback(function() { return Math.max(...processes.map(p => p.zIndex ? p.zIndex : 0)); },[processes]);
+  function getMaxZIndex(processes) { return Math.max(...processes.map(p => p.zIndex ? p.zIndex : 0)); }
 
   // functions for open/focus/minimize/close windows
   const openProgram = program => {
@@ -48,7 +49,7 @@ function App() {
     setProcesses([...processes, process]);
   };
   const focusWindow = pId => {
-    setProcesses(processes.map(p => p.id === pId ? { ...p, zIndex: getMaxZIndex() + 1 } : p));
+    setProcesses(processes.map(p => p.id === pId ? { ...p, zIndex: getMaxZIndex(processes) + 1 } : p));
   };
   const minimizeWindow = pId => {
     setProcesses(processes.map(p => p.id === pId ? { ...p, zIndex: -1 } : p));
@@ -65,7 +66,7 @@ function App() {
 
   // updates the focus window when a window is opened/closed/minimized
   React.useEffect(() => {
-    const maxZIndex = getMaxZIndex();
+    const maxZIndex = getMaxZIndex(processes);
     setFocus(processes.find(p => p.zIndex === maxZIndex));
   }, [processes]);
 
@@ -96,64 +97,42 @@ function DesktopIcon({ program }) {
 }
 
 function Window({ process, focus }) {
-  const focusWindowEffect = useCallback(() => focusWindowGlobal(process.id), [process.id]);
-  React.useEffect(focusWindowEffect, []);
-  // the window's position (the top left corner of the window)
-  const [x, setX] = React.useState(Math.floor(Math.random() * 100));
-  const [y, setY] = React.useState(Math.floor(Math.random() * 100));
-  // (ONLY USED IN DRAGGING) the offset between the mouse/touchscreen pointer and the window's position
-  const [dx, setDx] = React.useState(0);
-  const [dy, setDy] = React.useState(0);
+  React.useEffect(() => focusWindowGlobal(process.id), [process.id]);
   // the width/height of the window
   const [w, setW] = React.useState(null);
   const [h, setH] = React.useState(null);
   const [isFullScreen, setIsFullScreen] = React.useState(false);
 
   const resizeHandler = e => {
-    setW(e.changedTouches[0].clientX - x);
-    setH(e.changedTouches[0].clientY - y);
+    setW(e.changedTouches[0].clientX);
+    setH(e.changedTouches[0].clientY);
   }
-  const dragStartHandler = e => {
-    focusWindowGlobal(process.id);
-    setDx(e.clientX - x);
-    setDy(e.clientY - y);
-  };
-  // dragStartHandler but for mobile device (because CSS dragable is not available mobile)
-  const dragStartMobileHandler = e => {
-    focusWindowGlobal(process.id);
-    setDx(e.changedTouches[0].clientX - x);
-    setDy(e.changedTouches[0].clientY - y);
-  };
-  const dragHandler = e => {
-    setX(e.clientX - dx);
-    setY(e.clientY - dy);
-  };
-  // dragHandler but for mobile device (because CSS dragable is not available mobile)
-  const dragMobileHandler = e => {
-    setX(e.changedTouches[0].clientX - dx);
-    setY(e.changedTouches[0].clientY - dy);
-  };
-  const dragEndHandler = e => e.preventDefault();
   const focusHandler = () => focusWindowGlobal(process.id);
   const minimizeHandler = () => minimizeWindowGlobal(process.id);
   const fullScreenHandler = () => setIsFullScreen(!isFullScreen);
   const closeHandler = () => closeWindowGlobal(process.id);
 
+  const [isDraggable, setIsDraggable] = React.useState(false);
   return (
-    <div className='window-container' style={{ top: isFullScreen ? 0 : y, left: isFullScreen ? 0 : x, width: isFullScreen && '100%', height: isFullScreen && '100%', zIndex: process.zIndex, display: process.zIndex < 0 && 'none' }}>
+    <Draggable disabled={isFullScreen || !isDraggable} position={isFullScreen && {y: 0, x: 0}}>
+    <div className='window-container' style={{ top: 0, left: 0, width: isFullScreen && '100%', height: isFullScreen && '100%', zIndex: process.zIndex, display: process.zIndex < 0 && 'none' }}>
       <div className='window' style={{ position: 'relative', width: isFullScreen ? '100%' : w, height: isFullScreen ? '100%' : h, resize: !isFullScreen && 'both' }}>
         {process !== focus && <div onClick={focusHandler} style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}></div>}
         <div onTouchMove={resizeHandler} style={{ position: 'absolute', bottom: 0, right: 0, height: 20, width: 20 }}></div>
         <div className='window-header'>
           <div className='window-name' style={{ position: 'relative' }}>
             <div
-              draggable={!isFullScreen ? 'true' : 'false'}
-              onDragStart={dragStartHandler}
-              onTouchStart={dragStartMobileHandler}
-              onDrag={dragHandler}
-              onTouchMove={dragMobileHandler}
-              onDragEnd={dragEndHandler}
-              onDragOver={dragEndHandler}
+              // draggable={!isFullScreen ? 'true' : 'false'}
+              // onDragStart={dragStartHandler}
+              // onTouchStart={dragStartMobileHandler}
+              // onDrag={dragHandler}
+              // onTouchMove={dragMobileHandler}
+              // onDragEnd={dragEndHandler}
+              // onDragOver={dragEndHandler}
+              
+              onMouseEnter={() => {setIsDraggable(true)}}
+              onMouseDown={()=>focusWindowGlobal(process.id)}
+              onMouseLeave={() => {setIsDraggable(false)}}
               style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}
             ></div>
             <img className='window-icon' src={process.icon} alt={process.name + ' icon'} />
@@ -166,6 +145,7 @@ function Window({ process, focus }) {
         <div className='window-main'>{process.content}</div>
       </div>
     </div>
+    </Draggable>
   );
 }
 
