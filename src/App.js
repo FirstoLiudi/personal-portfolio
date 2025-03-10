@@ -10,7 +10,7 @@ import './App.css';
 import emailjs from '@emailjs/browser';
 import React from 'react';
 import Iframe from 'react-iframe';
-import Draggable from 'react-draggable';
+import DraggableCore from 'react-draggable';
 
 // the programs that is shown in the start menu
 const mainPrograms = [
@@ -113,8 +113,9 @@ function Window({ process, focus }) {
   const closeHandler = () => closeWindowGlobal(process.id);
 
   const [isDraggable, setIsDraggable] = React.useState(false);
+  
   return (
-    <Draggable disabled={isFullScreen || !isDraggable} position={isFullScreen && {y: 0, x: 0}}>
+    <DraggableCore onstart={()=>{focusWindowGlobal(process.id);setIsDraggable(true)}} onStop={()=>setIsDraggable(false)} disabled={isFullScreen || !isDraggable} position={isFullScreen && {y: 0, x: 0}} defaultPosition={{x: Math.floor(Math.random() * 130), y: Math.floor(Math.random() * 130)}}>
     <div className='window-container' style={{ top: 0, left: 0, width: isFullScreen && '100%', height: isFullScreen && '100%', zIndex: process.zIndex, display: process.zIndex < 0 && 'none' }}>
       <div className='window' style={{ position: 'relative', width: isFullScreen ? '100%' : w, height: isFullScreen ? '100%' : h, resize: !isFullScreen && 'both' }}>
         {process !== focus && <div onClick={focusHandler} style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}></div>}
@@ -122,17 +123,12 @@ function Window({ process, focus }) {
         <div className='window-header'>
           <div className='window-name' style={{ position: 'relative' }}>
             <div
-              // draggable={!isFullScreen ? 'true' : 'false'}
-              // onDragStart={dragStartHandler}
-              // onTouchStart={dragStartMobileHandler}
-              // onDrag={dragHandler}
-              // onTouchMove={dragMobileHandler}
-              // onDragEnd={dragEndHandler}
-              // onDragOver={dragEndHandler}
               
               onMouseEnter={() => {setIsDraggable(true)}}
               onMouseDown={()=>focusWindowGlobal(process.id)}
-              onMouseLeave={() => {setIsDraggable(false)}}
+              
+              onstart={()=>{focusWindowGlobal(process.id);setIsDraggable(true)}}
+              onTouchMove={() => {focusWindowGlobal(process.id);setIsDraggable(true)}}
               style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}
             ></div>
             <img className='window-icon' src={process.icon} alt={process.name + ' icon'} />
@@ -145,7 +141,7 @@ function Window({ process, focus }) {
         <div className='window-main'>{process.content}</div>
       </div>
     </div>
-    </Draggable>
+    </DraggableCore>
   );
 }
 
