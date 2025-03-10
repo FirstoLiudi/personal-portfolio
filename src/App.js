@@ -8,7 +8,7 @@ import notepad_icon from './img/icon-notepad.png';
 import taskbar_start_icon from './img/icon-taskbar-start.jpeg';
 import './App.css';
 import emailjs from '@emailjs/browser';
-import React from 'react';
+import React, { useCallback } from 'react';
 import Iframe from 'react-iframe';
 
 // the programs that is shown in the start menu
@@ -38,7 +38,7 @@ function App() {
   const [focus, setFocus] = React.useState({});
 
   // returns the biggest z-index of the windows
-  function getMaxZIndex() { return Math.max(...processes.map(p => p.zIndex ? p.zIndex : 0)); }
+  const getMaxZIndex=useCallback(function() { return Math.max(...processes.map(p => p.zIndex ? p.zIndex : 0)); },[processes]);
 
   // functions for open/focus/minimize/close windows
   const openProgram = program => {
@@ -96,7 +96,8 @@ function DesktopIcon({ program }) {
 }
 
 function Window({ process, focus }) {
-  React.useEffect(() => focusWindowGlobal(process.id), []);
+  const focusWindowEffect = useCallback(() => focusWindowGlobal(process.id), [process.id]);
+  React.useEffect(focusWindowEffect, []);
   // the window's position (the top left corner of the window)
   const [x, setX] = React.useState(Math.floor(Math.random() * 100));
   const [y, setY] = React.useState(Math.floor(Math.random() * 100));
